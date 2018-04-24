@@ -46,11 +46,11 @@ struct number power(struct number x, double p) {
 struct numberpolar postwykl(struct number x) {
 	numberpolar y;
 	y.absvalue = pow((x.real*x.real + x.imaginary*x.imaginary), 0.5);
-	y.arg = (acos(x.real / y.absvalue))/M_PI;
+	y.arg = (acos(x.real / y.absvalue)) / M_PI;
 	return y;
 }
 
-
+//funkcja zczytujaca liczbe zespolona z tekstu i zwracajaca ja w formie kanonicznej
 struct number extractnumber(char str[]) {
 	char *end;
 	number x;
@@ -63,7 +63,7 @@ struct number extractnumber(char str[]) {
 		x.real = a;
 		x.imaginary = b;
 	}
-	else if (*end == 'e' && *(end + 1) == 'x' && *(end + 2) == 'p' && *(end+3) == '(' && (*(end + 4) == 'j' || (*(end + 5) == 'j' && *(end+4)=='-'))) {
+	else if (*end == 'e' && *(end + 1) == 'x' && *(end + 2) == 'p' && *(end + 3) == '(' && (*(end + 4) == 'j' || (*(end + 5) == 'j' && *(end + 4) == '-'))) {
 		if (*(end + 4) == 'j')
 			b = strtod(end + 5, NULL);
 		else {
@@ -73,23 +73,41 @@ struct number extractnumber(char str[]) {
 		x.real = a * cos(b*M_PI);
 		x.imaginary = a * sin(b*M_PI);
 	}
-	else
-		printf("blad\n");
-
-
+	else if (*end == NULL && isdigit(*str)) {
+		x.real = a;
+		x.imaginary = 0;
+	}
+	else if (*str == 'j') {
+		a = strtod(str + 1, &end);
+		x.real = 0;
+		x.imaginary = a;
+	}
+		
 	return x;
 
 }
+//funkcja sprawdzajaca czy wpisany tekst jest prawidlowy
 int checkinput(char str[]) {
 	int q = 0;
 	char *end, *end1;
 	int k = 0;
-	double a, b;
-	if (!isdigit(*str) && *str!='-') {
+	double a, b, z = 1;
+	if (!isdigit(*str) && *str != '-' && *str != 'j') {
 		printf("Blad! ->          ");
 		printf("^\n");
+		if (*str == '-')
+			z = -1;
 	}
 	a = strtod(str, &end);
+	if (*str == 'j')
+		a = strtod(str + 1, &end);
+	a = a*z;
+	if (*end == NULL && isdigit(*str)) {
+		return 0;
+	}
+	if (*str == 'j' && *end == NULL) {
+		return 0;
+	}
 	int i = 0;
 	while (end != str) {
 		i++;
@@ -158,7 +176,7 @@ int checkinput(char str[]) {
 
 
 	//
-	else if ((*(end + 1) != 'j' || *(end+4)=='-')) {
+	else if ((*(end + 1) != 'j' || *(end + 4) == '-')) {
 		if (*(end1) != 'p') {
 			printf("Blad! ->          ");
 			for (int j = 0; j < i + k; j++)
@@ -168,7 +186,7 @@ int checkinput(char str[]) {
 		}
 	}
 	else if ((*(end + 1) != 'j' || *(end + 4) == '-')) {
-		if (*(end1+1) != 'i') {
+		if (*(end1 + 1) != 'i') {
 			printf("Blad! ->          ");
 			for (int j = 0; j < i + k; j++)
 				printf(" ");
@@ -191,10 +209,14 @@ int checkinput(char str[]) {
 
 
 void main() {
-	
+
 	number x, y;
 	int p, q = 0;
 	char tekst[100];
+	int i;
+	for (i = 0; i < 100; ++i) {
+		tekst[i] = NULL;
+	}
 	printf("Liczba zespolona: ");
 	scanf("%s", &tekst);
 	q = checkinput(tekst);
@@ -207,5 +229,5 @@ void main() {
 	printf("Wynik (postac kanoniczna) : %lf+j%lf\n", y.real, y.imaginary);
 	numberpolar z;
 	z = postwykl(y);
-	printf("Wynik (postac wykladnicza) : %lfexp(j%lfpi)", z.absvalue, z.arg);	
+	printf("Wynik (postac wykladnicza) : %lfexp(j%lfpi)", z.absvalue, z.arg);
 }
