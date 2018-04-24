@@ -60,6 +60,8 @@ struct number extractnumber(char str[]) {
 		b = strtod(end + 2, NULL);
 		if (*end == '-')
 			b = b* (-1);
+		if (*str == '-')
+			a = a *(-1);
 		x.real = a;
 		x.imaginary = b;
 	}
@@ -73,12 +75,18 @@ struct number extractnumber(char str[]) {
 		x.real = a * cos(b*M_PI);
 		x.imaginary = a * sin(b*M_PI);
 	}
-	else if (*end == NULL && isdigit(*str)) {
+	else if (*end == NULL && (isdigit(*str)||*str=='-')) {
+		if (*str == 'j')
+			a = a * (-1);
 		x.real = a;
 		x.imaginary = 0;
 	}
-	else if (*str == 'j') {
+	else if (*str == 'j' || (*str == '-' && *(str+1)=='j')) {
 		a = strtod(str + 1, &end);
+		if (*str == '-') {
+			a = strtod(str + 2, &end);
+			a = a*(-1);
+		}
 		x.real = 0;
 		x.imaginary = a;
 	}
@@ -102,7 +110,11 @@ int checkinput(char str[]) {
 	if (*str == 'j')
 		a = strtod(str + 1, &end);
 	a = a*z;
-	if (*end == NULL && isdigit(*str)) {
+	if (*end == NULL && isdigit(*str)||(*str == '-' && isdigit(*(str+1)))) {
+		if (*str == '-') {
+			a = strtod(str + 1, &end);
+			a = a*(-1);
+		}
 		return 0;
 	}
 	if (*str == 'j' && *end == NULL) {
